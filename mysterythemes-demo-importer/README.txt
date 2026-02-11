@@ -1,10 +1,10 @@
 === Mystery Themes Demo Importer ===
 Contributors:       mysterythemes
 Tags:               mysterythemes, one click demo import, theme demos, demo, importer
-Requires at least:  4.7
-Tested up to:       6.5
+Requires at least:  5.0
+Tested up to:       6.8
 Stable tag:         1.2.0
-Requires PHP:       5.6
+Requires PHP:       7.2
 License:            GPLv3
 License URI:        https://www.gnu.org/licenses/gpl-3.0.html
 
