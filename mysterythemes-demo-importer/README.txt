@@ -1,9 +1,9 @@
 === Mystery Themes Demo Importer ===
 Contributors:       mysterythemes
 Tags:               mysterythemes, one click demo import, theme demos, demo, importer
-Requires at least:  5.0
-Tested up to:       6.8
-Stable tag:         1.2.0
+Requires at least:  4.7
+Tested up to:       7.0
+Stable tag:         1.2.1
 Requires PHP:       7.2
 License:            GPLv3
 License URI:        https://www.gnu.org/licenses/gpl-3.0.html
@@ -58,6 +58,11 @@ You can contribute to the source code in our [GitHub](https://github.com/mystery
 3. Finally, Import the Demo with just one click.
 
 == Changelog ==
+
+    = 1.2.1 - May 26, 2026 =
+        * Improvement - Close button ui color changed.
+        * Fixed - Responsive button hover and active issue fixed.
+        * Fixed - Demo import loader icon alignment issue fixed.
 
     = 1.2.0 - July 03, 2024 =
         * Fixed - several escaping and sanitization variables using plugin check.
@@ -152,6 +157,15 @@ You can contribute to the source code in our [GitHub](https://github.com/mystery
 
 == Upgrade Notice ==
 
+    = 1.2.1 - May 26, 2026 =
+        * Improvement - Close button ui color changed.
+        * Fixed - Responsive button hover and active issue fixed.
+        * Fixed - Demo import loader icon alignment issue fixed.
+
+    = 1.2.0 - July 03, 2024 =
+        * Fixed - several escaping and sanitization variables using plugin check.
+        * Fixed - depreciated function.
+        
     = 1.1.9 - April 12, 2024 =
         * Fixed - design tweak in demo preview iframe.
         * Added - new theme slug compatible.

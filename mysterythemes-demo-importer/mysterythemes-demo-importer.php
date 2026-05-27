@@ -3,11 +3,11 @@
  * Plugin Name:		Mystery Themes Demo Importer
  * Plugin URI: 		https://wordpress.org/plugins/mysterythemes-demo-importer/
  * Description:		One Click Demo Importer For Mystery Themes official themes demo content, customization options, widgets and theme settings.
- * Version:			1.2.0
+ * Version:			1.2.1
  * Author:			Mystery Themes
  * Author URI:		https://mysterythemes.com/
  * License:			GPLv3 or later
- * License URI:		http://www.gnu.org/licenses/gpl-2.0.txt
+ * License URI:		https://www.gnu.org/licenses/gpl-3.0.en.html
  * Text Domain:		mysterythemes-demo-importer
  * Domain Path:		/languages
  */
@@ -22,7 +22,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  */
 if ( ! defined( 'MTDI_VERSION' ) ) {
-	define( 'MTDI_VERSION', '1.2.0' );
+	define( 'MTDI_VERSION', '1.2.1' );
 }
 
 if ( ! defined( 'MTDI_TD' ) ) {

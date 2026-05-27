@@ -80,10 +80,9 @@ class MTDI_Demo_WPImporter extends WP_Importer {
 
 			case 2:
 				check_admin_referer( 'import-wordpress' );
-				$this->fetch_attachments = ( ! empty( $_POST['fetch_attachments'] ) && $this->allow_fetch_attachments() );
-				$this->id                = (int) $_POST['import_id'];
-				$file                    = get_attached_file( $this->id );
-				set_time_limit( 0 );
+				$this->fetch_attachments 	= ( ! empty( $_POST['fetch_attachments'] ) && $this->allow_fetch_attachments() );
+				$this->id 					= isset( $_POST['import_id'] ) ? (int) $_POST['import_id'] : 0;
+				$file                    	= get_attached_file( $this->id );
 				$this->import( $file );
 				break;
 				
@@ -367,16 +366,23 @@ class MTDI_Demo_WPImporter extends WP_Importer {
 			return;
 		}
 
+		// The nonce is set in import_options() via wp_nonce_field( 'import-wordpress' ).
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'import-wordpress' ) ) {
+			wp_die( esc_html__( 'Security check failed. Please try again.', 'mysterythemes-demo-importer' ) );
+		}
+
 		$create_users = $this->allow_create_users();
 
-		foreach ( (array) $_POST['imported_authors'] as $i => $old_login ) {
+		$imported_authors = array_map( 'sanitize_text_field', wp_unslash( (array) $_POST['imported_authors'] ) );
+
+		foreach ( $imported_authors as $i => $old_login ) {
 
 			// Multisite adds strtolower to sanitize_user. Need to sanitize here to stop breakage in process_posts.
 			$santized_old_login = sanitize_user( $old_login, true );
 			$old_id             = isset( $this->authors[ $old_login ]['author_id'] ) ? intval( $this->authors[ $old_login ]['author_id'] ) : false;
 
 			if ( ! empty( $_POST['user_map'][ $i ] ) ) {
-				$user = get_userdata( intval( $_POST['user_map'][ $i ] ) );
+				$user = get_userdata( intval( wp_unslash( $_POST['user_map'][ $i ] ) ) );
 				if ( isset( $user->ID ) ) {
 					if ( $old_id ) {
 						$this->processed_authors[ $old_id ] = $user->ID;
@@ -385,7 +391,7 @@ class MTDI_Demo_WPImporter extends WP_Importer {
 				}
 			} elseif ( $create_users ) {
 				if ( ! empty( $_POST['user_new'][ $i ] ) ) {
-					$user_id = wp_create_user( sanitize_text_field( $_POST['user_new'][ $i ] ), wp_generate_password() );
+					$user_id = wp_create_user( sanitize_text_field( wp_unslash( $_POST['user_new'][ $i ] ) ), wp_generate_password() );
 				} elseif ( $this->version != '1.0' ) {
 					$user_data = array(
 						'user_login'   => $old_login,
@@ -1244,9 +1250,14 @@ class MTDI_Demo_WPImporter extends WP_Importer {
 	    }
 
 	    // Set correct file permissions.
+	    global $wp_filesystem;
+	    if ( ! function_exists( 'WP_Filesystem' ) ) {
+	        require_once ABSPATH . 'wp-admin/includes/file.php';
+	    }
+	    WP_Filesystem();
 	    $stat  = stat( dirname( $new_file ) );
 	    $perms = $stat['mode'] & 0000666;
-	    chmod( $new_file, $perms );
+	    $wp_filesystem->chmod( $new_file, $perms );
 
 	    // Delete temporary file using wp_delete_file().
 	    wp_delete_file( $tmp_file_name );
@@ -1462,31 +1473,10 @@ class MTDI_Demo_WPImporter extends WP_Importer {
 
 	/**
 	 * Parses filename from a Content-Disposition header value.
-	 *
-	 * As per RFC6266:
-	 *
-	 *     content-disposition = "Content-Disposition" ":"
-	 *                            disposition-type *( ";" disposition-parm )
-	 *
-	 *     disposition-type    = "inline" | "attachment" | disp-ext-type
-	 *                         ; case-insensitive
-	 *     disp-ext-type       = token
-	 *
-	 *     disposition-parm    = filename-parm | disp-ext-parm
-	 *
-	 *     filename-parm       = "filename" "=" value
-	 *                         | "filename*" "=" ext-value
-	 *
-	 *     disp-ext-parm       = token "=" value
-	 *                         | ext-token "=" ext-value
-	 *     ext-token           = <the characters in token, followed by "*">
-	 *
+	 * 
 	 * @since 0.7.0
 	 *
 	 * @see WP_REST_Attachments_Controller::get_filename_from_disposition()
-	 *
-	 * @link http://tools.ietf.org/html/rfc2388
-	 * @link http://tools.ietf.org/html/rfc6266
 	 *
 	 * @param string[] $disposition_header List of Content-Disposition header values.
 	 * @return string|null Filename if available, or null if not found.

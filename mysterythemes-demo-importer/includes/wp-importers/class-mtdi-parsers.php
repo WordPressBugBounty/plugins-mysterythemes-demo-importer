@@ -782,7 +782,27 @@ class MTDI_Parser_Regex {
 		if ( $this->has_gzip ) {
 			return gzopen( $filename, $mode );
 		}
-		return fopen( $filename, $mode );
+		//return fopen( $filename, $mode );
+
+		global $wp_filesystem;
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		if ( empty( $wp_filesystem ) ) {
+			WP_Filesystem();
+		}
+
+		// WP_Filesystem has no streaming API, so load the file into a php://temp
+		// stream so the rest of the line-by-line parsing code stays unchanged.
+		$contents = $wp_filesystem->get_contents( $filename );
+		if ( false === $contents ) {
+			return false;
+		}
+		$stream = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		fwrite( $stream, $contents ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+		rewind( $stream );
+		return $stream;
+
 	}
 
 	function feof( $fp ) {
@@ -803,7 +823,6 @@ class MTDI_Parser_Regex {
 		if ( $this->has_gzip ) {
 			return gzclose( $fp );
 		}
-		return fclose( $fp );
 	}
 	
 }

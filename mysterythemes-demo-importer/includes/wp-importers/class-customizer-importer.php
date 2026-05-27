@@ -185,10 +185,10 @@ class MTDI_Customizer_Importer {
 
 			// Do the validation and storage stuff.
 			$id = media_handle_sideload( $file_array, 0 );
-
-			// If error storing permanently, unlink.
+			
+			// FIX: Replaced discouraged @unlink() with wp_delete_file() for temp file cleanup.
 			if ( is_wp_error( $id ) ) {
-				@unlink( $file_array['tmp_name'] );
+				wp_delete_file( $file_array['tmp_name'] );
 				return $id;
 			}
 

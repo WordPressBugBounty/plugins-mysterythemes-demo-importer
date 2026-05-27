@@ -58,7 +58,7 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 		 */
 		public function enqueue_scripts( $hook_suffix ) {
 			/**
-			 * Applies condition for theme setting s page only.
+			 * Applies condition for theme settings page only.
 			 */
 			$activated_theme = get_stylesheet();
 
@@ -137,8 +137,11 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 		 * @since 1.0.0
 		 */
 		public function displayPopupImportForm() {
-			
-			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'mtdi_admin_import_nonce' ) ) {
+
+			// FIX: Added isset() check before accessing $_POST['_wpnonce']
+			$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+
+			if ( ! wp_verify_nonce( $nonce, 'mtdi_admin_import_nonce' ) ) {
 				esc_html_e( 'This action was stopped for security purposes.', 'mysterythemes-demo-importer' );
 				die();
 			}
@@ -149,7 +152,9 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 			if ( empty( $demodata ) || $demodata == false ) {
 				$demodata = $this->retrieve_demo_by_activatetheme( $selected_demo );
 			}
-			$selected_demo 	= sanitize_text_field( $_POST['plugin_slug'] );
+
+			// FIX: Added isset() check, wp_unslash(), and sanitize_text_field()
+			$selected_demo = isset( $_POST['plugin_slug'] ) ? sanitize_text_field( wp_unslash( $_POST['plugin_slug'] ) ) : '';
 
 			include( MTDI_ADMIN_DIR. 'partials/mtdi-import-popup.php' );
 			wp_die();
@@ -161,7 +166,11 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 		 * @since 1.0.0
 		 */
 		function install_required_plugins() {
-			if ( ! wp_verify_nonce( sanitize_text_field ( wp_unslash( $_POST['_wpnonce'] ) ), 'mtdi_admin_import_nonce' ) ) {
+
+			// FIX: Added isset() check before accessing $_POST['_wpnonce']
+			$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+
+			if ( ! wp_verify_nonce( $nonce, 'mtdi_admin_import_nonce' ) ) {
 				esc_html_e( 'This action was stopped for security purposes.', 'mysterythemes-demo-importer' );
 				die();
 			}
@@ -214,7 +223,8 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 			// Install plugin locally from zip file
 			if ( isset( $_POST['install'] ) && ( $_POST['install'] === "locally" ) ) {
 				$file_location = get_template_directory() . '/inc/plugins/' . esc_html( $plugin_slug ) . '.zip';
-				$file = $_POST['file'];
+				// FIX: Added isset() check, wp_unslash(), and sanitize_text_field() for $_POST['file']
+				$file = isset( $_POST['file'] ) ? sanitize_text_field( wp_unslash( $_POST['file'] ) ) : '';
 				$plugin_directory = ABSPATH . 'wp-content/plugins/';
 
 				$zip = new ZipArchive;
@@ -311,13 +321,17 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 		 */
 		public function activate_req_plugins() {
 
-			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'mtdi_admin_import_nonce' ) ) {
-				esc_html_e_( 'This action was stopped for security purposes.', 'mysterythemes-demo-importer' );
+			// FIX: Added isset() check before accessing $_POST['_wpnonce']
+			$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+
+			if ( ! wp_verify_nonce( $nonce, 'mtdi_admin_import_nonce' ) ) {
+				esc_html_e( 'This action was stopped for security purposes.', 'mysterythemes-demo-importer' );
 				die();
 			}
-
-			$plugininit 	= ( isset( $_POST['plugin_init'] ) ) ? esc_attr( $_POST['plugin_init'] ) : '';
-			$result 	 	= activate_plugin( $plugininit );
+			
+			// FIX: Added wp_unslash() before sanitization and sanitize_text_field instead of esc_attr
+			$plugininit = isset( $_POST['plugin_init'] ) ? sanitize_text_field( wp_unslash( $_POST['plugin_init'] ) ) : '';
+			$result 	= activate_plugin( $plugininit );
 
 			if ( is_wp_error( $result ) ) {
 				// Process Error
@@ -352,14 +366,17 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 		 * @since 1.0.0
 		 */
 		public function import_all_demo() {
-			if (  wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'mtdi_admin_import_nonce' ) ) {
-				$execution_time = sanitize_text_field( $_POST['execution_time'] );
-				ini_set( 'memory_limit', '350M' );
-				if ( $execution_time != 'default' ) {
-					ini_set( 'max_execution_time', apply_filters( 'mtdi_demo_import_execution_time', $execution_time ) );
-				} else {
-					ini_set( 'max_execution_time', apply_filters( 'mtdi_demo_import_execution_time', 300 ) );
-				}
+
+			// FIX: Added isset() check before accessing $_POST['_wpnonce']
+			$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+
+			if ( wp_verify_nonce( $nonce, 'mtdi_admin_import_nonce' ) ) {
+
+				// FIX: Added isset() check and wp_unslash() for $_POST['execution_time']
+				$execution_time = isset( $_POST['execution_time'] ) ? sanitize_text_field( wp_unslash( $_POST['execution_time'] ) ) : 'default';
+
+				// FIX: Use wp_raise_memory_limit() instead of ini_set( 'memory_limit' )
+				wp_raise_memory_limit( 'admin' );
 				
 				if ( empty( $_POST['plugin_slug'] ) ) {
 					wp_send_json_error(
@@ -371,7 +388,8 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 					);
 				}
 
-				$slug	= sanitize_key( wp_unslash( $_POST['plugin_slug'] ) );
+				$slug = sanitize_key( wp_unslash( $_POST['plugin_slug'] ) );
+
 				if ( ! defined( 'WP_LOAD_IMPORTERS' ) ) {
 					define( 'WP_LOAD_IMPORTERS', true );
 				}
@@ -552,26 +570,26 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 		    $response_code = wp_remote_retrieve_response_code( $response );
 
 		    if ( is_wp_error( $response ) ) {
-		        // Handle the error appropriately
-		        error_log( 'Failed to fetch the import file: ' . $response->get_error_message() );
+		        // FIX: Removed error_log() — not suitable for production. Use WP_DEBUG log or custom logging.
 		        $status['errorMsg'] = esc_html__( 'Failed to fetch the import file.', 'mysterythemes-demo-importer' );
+
 		        wp_send_json_error( $status );
 		        return false;
 		    } elseif ( $response_code == 200 ) {
 		        $file_content = wp_remote_retrieve_body( $response );
 		        if ( ! $wp_filesystem->put_contents( $destination_path, $file_content, FS_CHMOD_FILE ) ) {
-		            // Handle the error if put_contents fails
-		            error_log( 'Failed to write the import file to the destination path.' );
+		            
+		            // FIX: Removed error_log() — not suitable for production.
 		            $status['errorMsg'] = esc_html__( 'Failed to write the import file to the destination path.', 'mysterythemes-demo-importer' );
 		            wp_send_json_error( $status );
 		            return false;
 		        }
 		    } else {
-		        // Handle the error for non-200 response codes
-		        error_log( 'Unexpected response code: ' . $response_code );
+		        // FIX: Removed error_log() — not suitable for production.
 		        $status['errorMsg'] = esc_html__( 'Unexpected response code while fetching the import file.', 'mysterythemes-demo-importer' );
 		        wp_send_json_error( $status );
 		        return false;
+
 		    }
 
 		    $import_file = MTDI_PLUGIN_DIR . 'includes/wp-importers/temp/demo.xml';
@@ -808,7 +826,7 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 							    break;
 
 						case 'mega_menus':
-							$nav_menu_items 			=  wp_get_nav_menu_items( $dropdown_data['menu']['name'] );
+							$nav_menu_items 			= wp_get_nav_menu_items( $dropdown_data['menu']['name'] );
 							$nav_menu_megamenu_items 	= $dropdown_data['menu']['items'];
 							
 							foreach ( $nav_menu_megamenu_items as $nav_menu_megamenu_item ) {
@@ -821,25 +839,25 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 
 										if ( isset( $nav_menu_megamenu_item['data'] ) ) {
 											$megamenu_meta_value = get_post_meta( $nav_menu_item->ID, $meta_key_name, true );
-											if ( function_exists( 'wp_get_sidebars_widgets' ) ) {
-												$widgets 			= wp_get_sidebars_widgets(true);
-												$megamenu_widgets 	= $widgets[$megamenu_widget_id];
-												$menu_data 			= $nav_menu_megamenu_item['data'];
-												foreach ( $menu_data as $menu_dat_key => $menu_dat_value ) {
-													foreach ( $menu_dat_value as $widget_per_col_key => $widget_per_col_value ) {
-														foreach ( $widget_per_col_value as $widget_num_key => $widget_num_value ) {
-															$col_widget_count = 0;
-															foreach ( $widget_num_value as $widget_index_key => $widget_index_value ) {
-																$widget_index 		= $widget_index_value['index'];
-																$widget_id_to_set 	= $megamenu_widgets[$widget_index];
-																$megamenu_meta_value['layout'][0]['row'][$widget_per_col_key]['items'][$col_widget_count]['widget_id'] = $widget_id_to_set;
-																$col_widget_count++;
-															}
+
+											// FIX: Replaced wp_get_sidebars_widgets() (forbidden) with get_option()
+											$all_widgets      = get_option( 'sidebars_widgets', array() );
+											$megamenu_widgets = isset( $all_widgets[ $megamenu_widget_id ] ) ? $all_widgets[ $megamenu_widget_id ] : array();
+											$menu_data = $nav_menu_megamenu_item['data'];
+											foreach ( $menu_data as $menu_dat_key => $menu_dat_value ) {
+												foreach ( $menu_dat_value as $widget_per_col_key => $widget_per_col_value ) {
+													foreach ( $widget_per_col_value as $widget_num_key => $widget_num_value ) {
+														$col_widget_count = 0;
+														foreach ( $widget_num_value as $widget_index_key => $widget_index_value ) {
+															$widget_index 		= $widget_index_value['index'];
+															$widget_id_to_set 	= isset( $megamenu_widgets[ $widget_index ] ) ? $megamenu_widgets[ $widget_index ] : '';
+															$megamenu_meta_value['layout'][0]['row'][$widget_per_col_key]['items'][$col_widget_count]['widget_id'] = $widget_id_to_set;
+															$col_widget_count++;
 														}
 													}
 												}
-												update_post_meta( $nav_menu_item->ID, $meta_key_name, $megamenu_meta_value );
-											} // check wp_get_sidebars_widgets function End
+											}
+											update_post_meta( $nav_menu_item->ID, $meta_key_name, $megamenu_meta_value );
 										}
 
 									}
@@ -931,7 +949,7 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 							break;
 
 						case 'mega_menus':
-							$nav_menu_items 			=  wp_get_nav_menu_items( $data_value['menu']['name'] );
+							$nav_menu_items 			= wp_get_nav_menu_items( $data_value['menu']['name'] );
 							$nav_menu_megamenu_items 	= $data_value['menu']['items'];
 							foreach ( $nav_menu_megamenu_items as $nav_menu_megamenu_item ) {
 								$item_title 		= $nav_menu_megamenu_item["title"];
@@ -965,8 +983,10 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 					if ( ! empty( $menu_items ) ) {
 						foreach ( $menu_items as $menu_item ) {
 							if ( isset( $menu_item->url ) && isset( $menu_item->db_id ) && 'custom' == $menu_item->type ) {
-								$site_parts = parse_url( home_url( '/' ) );
-								$menu_parts = parse_url( $menu_item->url );
+								
+								// FIX: Replaced parse_url() with wp_parse_url() for consistent output across PHP versions
+								$site_parts = wp_parse_url( home_url( '/' ) );
+								$menu_parts = wp_parse_url( $menu_item->url );
 
 								// Update existing custom nav menu item URL.
 								if ( isset( $menu_parts['path'] ) && isset( $menu_parts['host'] ) && apply_filters( 'mtdi_nav_menu_item_url_hosts', in_array( $menu_parts['host'], array( 'demo.mysterythemes.com', 'localhost' ) ) ) ) {
@@ -1451,11 +1471,15 @@ if ( !class_exists( 'MTDI_Admin' ) ) :
 		 * @since 1.0.0
 		 */
 		function mt_reset_widgets() {
-			$sidebars_widgets = wp_get_sidebars_widgets();
+
+			// FIX: Replaced wp_get_sidebars_widgets() (forbidden) with get_option()
+			$sidebars_widgets = get_option( 'sidebars_widgets', array() );
 
 			// Reset active widgets.
 			foreach ( $sidebars_widgets as $key => $widgets ) {
-				$sidebars_widgets[ $key ] = array();
+				if ( 'array_version' !== $key ) {
+					$sidebars_widgets[ $key ] = array();
+				}
 			}
 			wp_set_sidebars_widgets( $sidebars_widgets );
 		}

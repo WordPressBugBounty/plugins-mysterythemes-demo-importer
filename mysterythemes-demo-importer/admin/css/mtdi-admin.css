@@ -188,12 +188,17 @@
 	position: absolute;
 	right: -8px;
 	top: -7px;
-	background: skyblue;
+	background: #2271b1;
 	color: #ffffff;
 	border-radius: 66px;
 	padding: 5px;
 	text-decoration: none;
 	cursor: pointer;
+}
+
+.mtdi-demo-popup-close:hover{
+	background: #135e96;
+	color: #ffffff;
 }
 
 .theme-wrap1 .theme-footer {
@@ -237,8 +242,10 @@ a.button.instalplugin.alignright {
 	pointer-events: none;
 }
 
-.mtdi-demo-import-step.button-primary.updating-message:before {
-	margin-top: 12px;
+.mtdi-demo-import-step.button-primary.updating-message:before,
+.mtdi-install-setup.button-primary.updating-message:before,
+.mtdi-customize-button.button-primary.updating-message:before{
+	margin-top: 4px;
 }
 
 .mtdi-plugin-req-wrapper {
@@ -247,8 +254,15 @@ a.button.instalplugin.alignright {
 	overflow-x: hidden;
 }
 
-.mtdi-demo-import-step.button-primary.updating-message::before, .mtdi-install-setup.button-primary.updating-message::before {
-	margin-top: 12px;
+.mtdi-note-footer .dashicons {
+	color: #fff !important;
+	position: relative;
+	top: -2px;
+}
+
+.single-demo .demo-info-wrapper .button-primary.updating-message::before {
+	line-height: 1.7;
+	margin-right: 2px;
 }
 
 .demo-import-actions {
@@ -326,7 +340,7 @@ a.button.instalplugin.alignright {
 }
 
 .mtdi-note-footer .button .dashicons {
-	margin: 11px 0 0 5px;
+	margin: 0 0 0 5px;
 }
 
 .mtdi-note-close {
@@ -352,6 +366,31 @@ a.button.instalplugin.alignright {
 
 .theme-info1>.description {
 	padding: 0px 15px;
+}
+
+.wp-full-overlay-footer .devices button.active{
+	background-color: #fff;
+	border-bottom-color: #2271b1;
+}
+
+.wp-full-overlay-footer .devices button.active:before{
+	color: #2271b1;
+}
+
+.demo-listing-wrapper .demo-info-wrapper .button {
+	line-height: 32px;
+	height: 35px;
+	min-height: 35px;
+}
+
+.demo-listing-wrapper .demo-info-wrapper h2 {
+	padding: 20px 10px 17px;
+	line-height: 16px;
+}
+
+.demo-listing-wrapper .demo-info-wrapper .theme-actions {
+	box-shadow: none;
+	padding-right: 5px;
 }
 
 @media (max-width:1400px) { 
